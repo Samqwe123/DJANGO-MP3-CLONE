@@ -36,7 +36,7 @@
         <a href="?play={{song.id}}"> <!--go to path('' , views.py , name='index')-->
             <button class="play-button">Play</button>
         </a>
-       <img src="{{ song.cover_image.url }}" alt="">
+       <img style="width: 200px;" src="{{ song.cover_image.url }}" alt="">
     {% endfor %}
     </div>
     
