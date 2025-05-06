@@ -9,7 +9,7 @@ class register_Form(forms.Form):
     def clean_name(self):
         name = self.cleaned_data['name']
         if User.objects.filter(username=name).exists():
-            raise forms.ValidationError("Username alrady taken")
+            raise forms.ValidationError("Username already taken")
         return name
     
     def clean(self):
@@ -21,4 +21,12 @@ class register_Form(forms.Form):
             raise forms.ValidationError("Password not match.")
 
 
-
+class login_Form(forms.Form):
+    name = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput)
+    
+class playlist_Form(forms.Form):
+    name = forms.CharField(max_length=100,widget=forms.TextInput(attrs={
+        'placeholder' : 'e.g Happy ..'
+    }))
+    
