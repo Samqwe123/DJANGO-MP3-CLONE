@@ -1,8 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'main/base.html' %}
+{% block heading %}
     <title>{{ playlist.name }}</title>
     <style>
         .hidden-player {
@@ -27,9 +24,9 @@
         }
 
     </style>
-</head>
-<body>
+{% endblock %}
 
+{% block body %}
     
     <h2>Playlist: {{ playlist.name }}</h2>
 
@@ -45,25 +42,51 @@
     <ul>
         {% for song in playlist.song.all %}
          <li>{{song.title}}--{{song.artist}}</li>
-         <a href="?play={{song.id}}&shuffle={{ shuffle }}"> <!--go to path('view...' , views.py , name='index')-->
+         <a href="?play={{song.id}}"> <!--go to path('view...' , views.py , name='index')-->
             <button class="play-button">Play</button>
-        </a> 
+        </a>
         {% endfor %}
     </ul>
 
     {% if play_song %}
-        <iframe class="hidden-player" src="{{ play_song.yt_link_modify }}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <iframe id="ytplayer" class="hidden-player" src="{{ play_song.yt_link_modify }}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         <p>Now Playing: {{play_song.title}} - {{play_song.artist}}</p>
         {% if next_song %}
-        <a href="?play={{next_song.id}}&shuffle={{ shuffle }}"> <!--go to path('' , views.py , name='index')-->
+        <a id="nextSongBtn" href="?play={{next_song.id}}"> <!--go to path('' , views.py , name='index')-->
             <button class="play-button">{{next_song.title}} - {{next_song.artist}}</button>
         </a>
         {% endif %}
     {%else%}
         <p>Click the Button now!</p>
             
-
     {% endif %}
     
-</body>
-</html>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        var player;
+    
+        function onYouTubeIframeAPIReady() {
+            console.log("Initializing YouTube player...");
+            player = new YT.Player('ytplayer', {
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+    
+        function onPlayerStateChange(event) {
+            console.log("Player state changed: " + event.data);
+            if (event.data === YT.PlayerState.ENDED) {
+                // Automatically go to the next song
+                const nextBtn = document.getElementById("nextSongBtn");
+                if (nextBtn) {
+                    nextBtn.click(); // simulate a button click
+                } else{
+                    console.log("Next song button not found.");
+                }
+            }
+        }
+    
+    </script>
+    
+{% endblock %}

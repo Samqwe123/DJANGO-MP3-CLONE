@@ -10,16 +10,20 @@ def index(request):
     songs =Song.objects.all()
     play_song_id = request.GET.get('play' , None)
     play_song = None
-    playlists = PlayList.objects.filter(user=request.user)
+    playlists = PlayList.objects.none()
 
-    if request.method == 'POST':
-         song_id = request.POST.get('song_id')
-         playlist_id = request.POST.get('playlist_id')
+    if request.user.is_authenticated:
+         
+        playlists = PlayList.objects.filter(user=request.user)
 
-         if song_id and playlist_id:
-              playlist = PlayList.objects.get(id=playlist_id , user=request.user)
-              song = Song.objects.get(id=song_id)
-              playlist.song.add(song)
+        if request.method == 'POST':
+            song_id = request.POST.get('song_id')
+            playlist_id = request.POST.get('playlist_id')
+
+            if song_id and playlist_id:
+                playlist = PlayList.objects.get(id=playlist_id , user=request.user)
+                song = Song.objects.get(id=song_id)
+                playlist.song.add(song)
 
 
     if play_song_id:
@@ -91,7 +95,13 @@ def view_playlist(request , pk):
     if request.user.is_authenticated:
         playlist = get_object_or_404(PlayList, id=pk, user=request.user)
         play_song_id = request.GET.get('play' , None)
-        shuffle = request.GET.get('shuffle' , 'false') == 'true'
+        shuffle_parameter = request.GET.get('shuffle')
+        if shuffle_parameter is not None:
+             shuffle = shuffle_parameter == 'true'
+             request.session['shuffle'] = shuffle
+        else:
+             
+             shuffle = request.session.get('shuffle' , False)
         play_song = None
         next_song = None
 
@@ -101,15 +111,15 @@ def view_playlist(request , pk):
              play_song=Song.objects.get(id=play_song_id)
 
         if shuffle and play_song_list:
-             possible_songs = []
+            possible_songs = []
 
-             for song in play_song_list:
+            for song in play_song_list:
                 if song != play_song:
                     possible_songs.append(song)
                 
-                if possible_songs:
-                     next_song = choice(possible_songs)
-                
+            if possible_songs:
+                next_song = choice(possible_songs)
+                    
 
         else:
             if play_song in play_song_list:

@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>create new playlist</title>
-</head>
-<body>
-    <form method="post">
-        {% csrf_token %}
-        {{ forms.as_p }}
-        <button type="submit">create</button>
-    </form>
+{% extends 'main/base.html' %}
 
-{% if playlist %}
-    <a href="{% url 'all_playlist' %}">
-        <button type="view playlist">view playlist</button>
-    </a>
-{% endif %}
+{% block heading %}
+    <title>Create New Playlist!</title>
+{% endblock %}
 
-</body>
-</html>
+{% block body %}
+<form method="post" class="create-playlist-form">
+    {% csrf_token %}
+    <input placeholder="Name of the playlist..." type="text" name="name-playlist" required>
+    <button type="submit">Create</button>
+</form>
+{% endblock %}

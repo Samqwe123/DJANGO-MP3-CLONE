@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'main/base.html' %}
+
+{% block heading%}
     <title>MP3 clone</title>
     <style>
         .hidden-player {
@@ -27,28 +25,29 @@
         }
 
     </style>
-</head>
-<body>
+{% endblock %}
+{% block body %}
     <div class="song-list">
         {% for song in songs %}
         <h3>{{song.title}}</h3>
         <a href="?play={{song.id}}"> <!--go to path('' , views.py , name='index')-->
             <button class="play-button">Play</button>
         </a>
+        <form method ="post">
+            {% csrf_token %}
+            <input type="hidden" name="song_id" value="{{song.id}}">
+            <select name="playlist_id" required > <!--drop down menu-->
+                <option value="" selected disabled>Select Playlist</option>
+                {% for playlist in playlists %}
+                    <option value="{{playlist.id}}">{{playlist.name}}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Add to Playlist</button>
+           </form>
+        <br>
        <img style="width: 200px;" src="{{ song.cover_image.url }}" alt="">
 
-       <form method ="post">
-        {% csrf_token %}
-        <input type="hidden" name="song_id" value="{{song.id}}">
-        <select name="playlist_id" required > <!--drop down menu-->
-            <option value="" selected disabled>Select Playlist</option>
-            {% for playlist in playlists %}
-                <option value="{{playlist.id}}">{{playlist.name}}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Add to Playlist</button>
-
-       </form>
+      
     {% endfor %}
     </div>
     
@@ -57,5 +56,4 @@
         <iframe class="hidden-player" src="{{ play_song.yt_link_modify }}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     {% endif %}
 
-</body>
-</html>
+{% endblock%}
