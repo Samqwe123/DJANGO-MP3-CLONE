@@ -2,9 +2,21 @@
 {% block heading %}
     <title>{{ playlist.name }}</title>
     <style>
-        .hidden-player {
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-            position :absolute;
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hidden-player {
+            position: absolute;
             left: 99999px;
         }
 
@@ -13,80 +25,127 @@
             background-color: green;
             color: white;
             border: none;
-            margin-bottom: 20px;
+            cursor: pointer;
         }
 
         .song-list {
             margin-top: 20px;
-            display:grid;
-            place-items: center;
-            
+            width: 100%;
+            max-width: 600px;
         }
 
+        .song-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #898282;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .song-info {
+            font-weight: bold;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
-    
+<div class="container">
     <h2>Playlist: {{ playlist.name }}</h2>
 
-    <form method = "GET">
-        <input type = "hidden"  name="play" value="{% if play_song %}{{play_song.id}}{% endif %}" >
-        <input type = "hidden"  name="shuffle" value="{% if shuffle %}false{% else %}true{% endif %}" >
-        <button type = "submit">
+    <form method="GET">
+        <input type="hidden" name="play" value="{% if play_song %}{{ play_song.id }}{% endif %}">
+        <input type="hidden" name="shuffle" value="{% if shuffle %}false{% else %}true{% endif %}">
+        <button type="submit">
             {% if shuffle %} Disable Shuffle {% else %} Enable Shuffle {% endif %}
         </button>
     </form>
 
     <h3>Songs</h3>
-    <ul>
+    <div class="song-list">
         {% for song in playlist.song.all %}
-         <li>{{song.title}}--{{song.artist}}</li>
-         <a href="?play={{song.id}}"> <!--go to path('view...' , views.py , name='index')-->
-            <button class="play-button">Play</button>
-        </a>
+            <div class="song-box">
+                <div class="song-info">{{ song.title }} — {{ song.artist }}</div>
+
+                <a href="?play={{ song.id }}">
+                    <button class="play-button">Play</button>
+                </a>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
+
+    <div id="progressContainer" style="width: 100%; max-width: 600px; background: #ccc; height: 12px; border-radius: 6px; overflow: hidden; margin: 10px auto;">
+        <div id="progressBar" style="height: 100%; width: 0%; background: green;"></div>
+    </div>
 
     {% if play_song %}
         <iframe id="ytplayer" class="hidden-player" src="{{ play_song.yt_link_modify }}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        <p>Now Playing: {{play_song.title}} - {{play_song.artist}}</p>
+        <p>Now Playing: {{ play_song.title }} - {{ play_song.artist }}</p>
         {% if next_song %}
-        <a id="nextSongBtn" href="?play={{next_song.id}}"> <!--go to path('' , views.py , name='index')-->
-            <button class="play-button">{{next_song.title}} - {{next_song.artist}}</button>
-        </a>
+            <a id="nextSongBtn" href="?play={{ next_song.id }}">
+                <button class="play-button">{{ next_song.title }} - {{ next_song.artist }}</button>
+            </a>
         {% endif %}
-    {%else%}
+    {% else %}
         <p>Click the Button now!</p>
-            
     {% endif %}
-    
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
-        var player;
-    
-        function onYouTubeIframeAPIReady() {
-            console.log("Initializing YouTube player...");
-            player = new YT.Player('ytplayer', {
-                events: {
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-    
-        function onPlayerStateChange(event) {
-            console.log("Player state changed: " + event.data);
-            if (event.data === YT.PlayerState.ENDED) {
-                // Automatically go to the next song
-                const nextBtn = document.getElementById("nextSongBtn");
-                if (nextBtn) {
-                    nextBtn.click(); // simulate a button click
-                } else{
-                    console.log("Next song button not found.");
-                }
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    var player;
+
+    let progressInterval;
+
+    function onYouTubeIframeAPIReady() {
+        console.log("youtube api ready");
+        player = new YT.Player('ytplayer', {
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+    progressInterval = setInterval(updateProgressBar, 1000);
+}
+
+    function onPlayerStateChange(event) {
+        console.log("Player state changed:", event.data);
+
+        if (event.data === YT.PlayerState.ENDED) {
+            console.log("Song ended");
+            const nextBtn = document.getElementById("nextSongBtn");
+
+            if (nextBtn) {
+                console.log("Next button found. Redirecting to:", nextBtn.href);
+                window.location.href = nextBtn.href;
+            }
+            else{
+                console.log("No next button found.");
             }
         }
-    
-    </script>
-    
+    }
+
+    function updateProgressBar() {
+    if (player && player.getDuration) {
+        const duration = player.getDuration();
+        const currentTime = player.getCurrentTime();
+        const percent = (currentTime / duration) * 100;
+        document.getElementById('progressBar').style.width = percent + '%';
+    }
+}
+
+</script>
 {% endblock %}

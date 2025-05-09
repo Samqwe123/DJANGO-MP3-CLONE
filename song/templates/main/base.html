@@ -332,14 +332,15 @@
                         <a class="nav-link text-white fw-bold" href="{% url 'index' %}">Home</a>
                     </li>
                     {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link text-white fw-bold" href="{% url 'logout' %}">Logout</a>
-                    </li>
+                    
                     <li class="nav-item">
                         <a class="nav-link text-white fw-bold" href="{% url 'add_playlist' %}">Create Playlist</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white fw-bold" href="{% url 'all_playlists' %}">All Playlists</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white fw-bold" href="{% url 'logout' %}">Logout</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
